@@ -3,7 +3,13 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 
-export default function Likes({ tweet }: { tweet: TweetWithAuthor }) {
+export default function Likes({
+  tweet,
+  addOptimisticTweet,
+}: {
+  tweet: TweetWithAuthor;
+  addOptimisticTweet: (tweet: TweetWithAuthor) => void;
+}) {
   const router = useRouter();
 
   const handleLikes = async () => {
@@ -14,11 +20,23 @@ export default function Likes({ tweet }: { tweet: TweetWithAuthor }) {
 
     if (user) {
       if (tweet.user_has_liked_tweet) {
+        addOptimisticTweet({
+          ...tweet,
+          user_has_liked_tweet: false,
+          likes: tweet.likes - 1,
+        });
+
         await supabase
           .from("likes")
           .delete()
           .match({ user_id: user.id, tweet_id: tweet.id });
       } else {
+        addOptimisticTweet({
+          ...tweet,
+          user_has_liked_tweet: true,
+          likes: tweet.likes + 1,
+        });
+
         await supabase
           .from("likes")
           .insert({ user_id: user.id, tweet_id: tweet.id });
@@ -27,5 +45,9 @@ export default function Likes({ tweet }: { tweet: TweetWithAuthor }) {
     }
   };
 
-  return <button onClick={handleLikes}>{tweet.likes} Likes</button>;
+  return (
+    <form action={handleLikes}>
+      <button type="submit">{tweet.likes} Likes</button>
+    </form>
+  );
 }
