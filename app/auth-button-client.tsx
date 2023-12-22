@@ -29,8 +29,12 @@ export default function AuthButtonClient({
   };
 
   return session ? (
-    <button onClick={handleSignOut}>Sign out</button>
+    <button className="text-xs text-gray-400" onClick={handleSignOut}>
+      Sign out
+    </button>
   ) : (
-    <button onClick={handleSignIn}>Sign in with GitHub</button>
+    <button className="text-xs text-gray-400" onClick={handleSignIn}>
+      Sign in with GitHub
+    </button>
   );
 }
